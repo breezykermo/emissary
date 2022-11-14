@@ -19,6 +19,7 @@
 # is currently used only for test_scout.py.  This is a BRUTAL HACK.
 
 if [ "$1" != "--dev-magic" ]; then
+  exec /buildroot/arti &
   exec busyambassador entrypoint "$@"   # See comment above.
 fi
 

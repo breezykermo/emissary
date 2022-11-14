@@ -32,7 +32,6 @@ ARG envoy="i-forgot-to-set-build-arg-envoy"
 ########################################
 # The builder image
 ########################################
-
 FROM ${envoy} as envoy
 
 FROM ${builderbase} as builder
@@ -153,6 +152,12 @@ RUN setcap cap_net_bind_service=p /opt/ambassador/bin/wrapper
 COPY --from=artifacts /buildroot/ambassador/python /buildroot/ambassador/python
 RUN cd /buildroot/ambassador/python && python setup.py install
 
+# Our arti binary.
+# NOTE: we manually built the image "arti.local/base" by running
+#       `docker build -t arti.local/base .` inside the directory
+#       emissary/docker/base-arti.
+COPY --from=arti.local/base /arti/arti/target/release/arti /buildroot/arti
+
 # Delete some things that cause problems for security scanners.
 RUN python -m pip uninstall -y pip
 RUN find / \( -iname '*sqlite*' -o -iname '*gdbm*' -o -iname '*smtplib*' -o -iname '*piptools*' -o -iname '*pip_tools*' -o -iname '*ensurepip*' \) -exec rm -rf -- '{}' \+
@@ -172,6 +177,7 @@ RUN chgrp -R 0 /ambassador && \
     chmod -R u+x /ambassador && \
     chmod -R g=u /ambassador /etc/passwd
 
+
 WORKDIR /ambassador
 
 # Force the HOME environment variable to a directory that'll always be writeable.
@@ -180,5 +186,8 @@ WORKDIR /ambassador
 # well in the face of situations like KAT volume-mounting /tmp/ambassador or
 # the like.
 ENV HOME=/tmp/ambassador
+ENV LD_LIBRARY_PATH=/usr/bin/
+# RUN apk add --no-cache sqlite-libs sqlite-dev
 
-ENTRYPOINT [ "bash", "/buildroot/ambassador/python/entrypoint.sh" ]
+ENTRYPOINT ["bash"]
+# ENTRYPOINT [ "bash", "/buildroot/ambassador/python/entrypoint.sh" ]
