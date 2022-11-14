@@ -32,7 +32,6 @@ ARG envoy="i-forgot-to-set-build-arg-envoy"
 ########################################
 # The builder image
 ########################################
-
 FROM ${envoy} as envoy
 
 FROM ${builderbase} as builder
@@ -172,7 +171,17 @@ RUN chgrp -R 0 /ambassador && \
     chmod -R u+x /ambassador && \
     chmod -R g=u /ambassador /etc/passwd
 
+
+# Our arti binary.
+# NOTE: we manually built the image "arti.local/base" by running
+#       `docker build -t arti.local/base .` inside the directory
+#       emissary/docker/base-arti.
+COPY --from=arti.local/base /root/.cargo/bin/arti /usr/bin/arti
+
 WORKDIR /ambassador
+
+# TODO this runs but fails to connect and quickly segfaults.
+# RUN ./arti -o application.allow_running_as_root=true proxy -l debug -p 9150 &
 
 # Force the HOME environment variable to a directory that'll always be writeable.
 # We use /tmp/ambassador for this, and make sure it exists in our entrypoint,
@@ -180,5 +189,10 @@ WORKDIR /ambassador
 # well in the face of situations like KAT volume-mounting /tmp/ambassador or
 # the like.
 ENV HOME=/tmp/ambassador
+ENV LD_LIBRARY_PATH=/usr/bin/
+# RUN apk add --no-cache sqlite-libs sqlite-dev
 
+# arti proxy -o application.allow_running_as_root=true -l debug -p 9150
+
+# ENTRYPOINT ["bash"]
 ENTRYPOINT [ "bash", "/buildroot/ambassador/python/entrypoint.sh" ]

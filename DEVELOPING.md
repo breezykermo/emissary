@@ -683,7 +683,7 @@ a fan at it, and leave it running overnight and most of the next day.
 At Ambassador Labs, we'll often spin up a temporary build machine in GCE, so
 that we can build it very quickly.
 
-As of Envoy 1.15.0, we've measure the resource use to build and test
+As of Envoy 1.15.0, we've measured the resource use to build and test
 it as:
 
 > | Command            | Disk Size | Disk Used | Duration[1] |
