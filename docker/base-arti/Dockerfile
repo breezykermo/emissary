@@ -1,10 +1,15 @@
-FROM rust:1-buster
-
+FROM frolvlad/alpine-glibc:alpine-3.12_glibc-2.32
 WORKDIR /arti
-RUN apt-get update && apt-get install git
-RUN git clone https://gitlab.torproject.org/tpo/core/arti
+RUN apk add --upgrade git curl openssl libressl-dev alpine-sdk
 
+## Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > install_rust
+RUN chmod +x install_rust
+RUN ./install_rust -y
+
+## Arti
+RUN git clone https://gitlab.torproject.org/tpo/core/arti
 WORKDIR /arti/arti
-RUN cargo build --release
+RUN ~/.cargo/bin/cargo build -F static-sqlite --release
 
 CMD ["/bin/sh"]
