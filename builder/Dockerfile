@@ -152,12 +152,6 @@ RUN setcap cap_net_bind_service=p /opt/ambassador/bin/wrapper
 COPY --from=artifacts /buildroot/ambassador/python /buildroot/ambassador/python
 RUN cd /buildroot/ambassador/python && python setup.py install
 
-# Our arti binary.
-# NOTE: we manually built the image "arti.local/base" by running
-#       `docker build -t arti.local/base .` inside the directory
-#       emissary/docker/base-arti.
-COPY --from=arti.local/base /arti/arti/target/release/arti /buildroot/arti
-
 # Delete some things that cause problems for security scanners.
 RUN python -m pip uninstall -y pip
 RUN find / \( -iname '*sqlite*' -o -iname '*gdbm*' -o -iname '*smtplib*' -o -iname '*piptools*' -o -iname '*pip_tools*' -o -iname '*ensurepip*' \) -exec rm -rf -- '{}' \+
@@ -178,7 +172,17 @@ RUN chgrp -R 0 /ambassador && \
     chmod -R g=u /ambassador /etc/passwd
 
 
+# Our arti binary.
+# NOTE: we manually built the image "arti.local/base" by running
+#       `docker build -t arti.local/base .` inside the directory
+#       emissary/docker/base-arti.
+COPY --from=arti.local/base /arti/arti/target/release/arti /ambassador/arti
+
+
 WORKDIR /ambassador
+
+# TODO this runs but fails to connect and quickly segfaults.
+# RUN ./arti -o application.allow_running_as_root=true proxy -l debug -p 9150 &
 
 # Force the HOME environment variable to a directory that'll always be writeable.
 # We use /tmp/ambassador for this, and make sure it exists in our entrypoint,
