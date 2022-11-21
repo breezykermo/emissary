@@ -177,8 +177,6 @@ RUN chgrp -R 0 /ambassador && \
 #       `docker build -t arti.local/base .` inside the directory
 #       emissary/docker/base-arti.
 COPY --from=arti.local/base /root/.cargo/bin/arti /usr/bin/arti
-# RUN apk update && apk add sqlite-dev openssl-dev alpine-sdk
-
 
 WORKDIR /ambassador
 
@@ -194,5 +192,7 @@ ENV HOME=/tmp/ambassador
 ENV LD_LIBRARY_PATH=/usr/bin/
 # RUN apk add --no-cache sqlite-libs sqlite-dev
 
-ENTRYPOINT ["bash"]
-# ENTRYPOINT [ "bash", "/buildroot/ambassador/python/entrypoint.sh" ]
+# arti proxy -o application.allow_running_as_root=true -l debug -p 9150
+
+# ENTRYPOINT ["bash"]
+ENTRYPOINT [ "bash", "/buildroot/ambassador/python/entrypoint.sh" ]
