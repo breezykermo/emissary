@@ -10,6 +10,10 @@ RUN ./install_rust -y
 ## Arti
 RUN git clone https://gitlab.torproject.org/tpo/core/arti
 WORKDIR /arti/arti
-RUN ~/.cargo/bin/cargo build -F static-sqlite --release
+# NOTE: see https://gitlab.torproject.org/tpo/core/arti/-/issues/571 for
+# rationale behind the next command
+RUN apk update && \
+  apk add alpine-sdk sqlite-dev openssl-dev perl && \
+  ~/.cargo/bin/cargo install --features static arti
 
 CMD ["/bin/sh"]

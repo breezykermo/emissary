@@ -176,7 +176,8 @@ RUN chgrp -R 0 /ambassador && \
 # NOTE: we manually built the image "arti.local/base" by running
 #       `docker build -t arti.local/base .` inside the directory
 #       emissary/docker/base-arti.
-COPY --from=arti.local/base /arti/arti/target/release/arti /ambassador/arti
+COPY --from=arti.local/base /root/.cargo/bin/arti /usr/bin/arti
+# RUN apk update && apk add sqlite-dev openssl-dev alpine-sdk
 
 
 WORKDIR /ambassador
