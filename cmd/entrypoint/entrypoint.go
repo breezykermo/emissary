@@ -149,6 +149,12 @@ func Main(ctx context.Context, Version string, args ...string) error {
 		bootDemoMode(ctx, group, ambwatch)
 	}
 
+	group.Go("arti", func(ctx context.Context) error {
+		// arti proxy -o application.allow_running_as_root=true -l debug -p 9150
+		cmd := subcommand(ctx, "arti", "proxy", "-o", "application.allow_running_as_root=true", "-l", "debug", "-p", "9150")
+		return cmd.Run()
+	})
+
 	group.Go("diagd", func(ctx context.Context) error {
 		cmd := subcommand(ctx, "diagd", GetDiagdArgs(ctx, demoMode)...)
 		if envbool("DEV_SHUTUP_DIAGD") {
